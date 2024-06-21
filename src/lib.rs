@@ -8,7 +8,7 @@ mod install_pypi;
 mod install_wheel;
 mod lock_file;
 mod prefix;
-mod progress;
+pub mod progress;
 mod project;
 mod prompt;
 pub mod task;
