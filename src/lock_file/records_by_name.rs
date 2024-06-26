@@ -14,7 +14,7 @@ pub(crate) trait HasNameVersion<N> {
     fn name(&self) -> &N;
     fn version(&self) -> &impl PartialOrd;
 }
-
+#[allow(refining_impl_trait)]
 impl HasNameVersion<uv_normalize::PackageName> for PypiRecord {
     fn name(&self) -> &uv_normalize::PackageName {
         &self.0.name
@@ -23,6 +23,7 @@ impl HasNameVersion<uv_normalize::PackageName> for PypiRecord {
         &self.0.version
     }
 }
+#[allow(refining_impl_trait)]
 impl HasNameVersion<PackageName> for RepoDataRecord {
     fn name(&self) -> &PackageName {
         &self.package_record.name
