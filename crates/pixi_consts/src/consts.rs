@@ -9,6 +9,7 @@ pub const PYPROJECT_PIXI_PREFIX: &str = "tool.pixi";
 
 pub const PROJECT_MANIFEST: &str = "pixi.toml";
 pub const PYPROJECT_MANIFEST: &str = "pyproject.toml";
+pub const MOJOPROJECT_MANIFEST: &str = "mojoproject.toml";
 pub const PROJECT_LOCK_FILE: &str = "pixi.lock";
 pub const CONFIG_FILE: &str = "config.toml";
 pub const PIXI_DIR: &str = ".pixi";
