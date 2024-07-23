@@ -3,16 +3,31 @@ use lazy_static::lazy_static;
 use std::fmt::{Display, Formatter};
 use url::Url;
 
-pub const DEFAULT_ENVIRONMENT_NAME: &str = "default";
-pub const DEFAULT_FEATURE_NAME: &str = DEFAULT_ENVIRONMENT_NAME;
-pub const PYPROJECT_PIXI_PREFIX: &str = "tool.pixi";
+pub const CONFIG_DIR: &'static str = match option_env!("PIXI_CONFIG_DIR") {
+    Some(dir) => dir,
+    None => "pixi",
+};
+pub const PROJECT_LOCK_FILE: &str = match option_env!("PIXI_PROJECT_LOCK_FILE") {
+    Some(file) => file,
+    None => "pixi.lock",
+};
+pub const PIXI_DIR: &str = match option_env!("PIXI_DIR") {
+    Some(dir) => dir,
+    None => ".pixi",
+};
 
+lazy_static! {
+    /// The default channels to use for a new project.
+    pub static ref DEFAULT_CHANNELS: Vec<String> = match option_env!("PIXI_DEFAULT_CHANNELS") {
+        Some(channels) => channels.split(',').map(|s| s.to_string()).collect(),
+        None => vec!["conda-forge".to_string()],
+    };
+}
 pub const PROJECT_MANIFEST: &str = "pixi.toml";
 pub const PYPROJECT_MANIFEST: &str = "pyproject.toml";
 pub const MOJOPROJECT_MANIFEST: &str = "mojoproject.toml";
-pub const PROJECT_LOCK_FILE: &str = "pixi.lock";
+
 pub const CONFIG_FILE: &str = "config.toml";
-pub const PIXI_DIR: &str = ".pixi";
 pub const PIXI_VERSION: &str = "0.27.1";
 pub const PREFIX_FILE_NAME: &str = "pixi_env_prefix";
 pub const ENVIRONMENTS_DIR: &str = "envs";
@@ -25,9 +40,10 @@ pub const CONDA_INSTALLER: &str = "conda";
 
 pub const ONE_TIME_MESSAGES_DIR: &str = "one-time-messages";
 
-/// The default channels to use for a new project.
-pub const DEFAULT_CHANNELS: &[&str] = &["conda-forge"];
+pub const DEFAULT_ENVIRONMENT_NAME: &str = "default";
 
+pub const DEFAULT_FEATURE_NAME: &str = DEFAULT_ENVIRONMENT_NAME;
+pub const PYPROJECT_PIXI_PREFIX: &str = "tool.pixi";
 pub const ENVIRONMENT_FILE_NAME: &str = "pixi";
 
 lazy_static! {
