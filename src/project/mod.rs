@@ -36,7 +36,7 @@ use self::manifest::{pyproject::PyProjectToml, Environments};
 use crate::{
     activation::{initialize_env_variables, CurrentEnvVarBehavior},
     config::Config,
-    consts::{self, PROJECT_MANIFEST, PYPROJECT_MANIFEST},
+    consts::{self, MOJOPROJECT_MANIFEST, PROJECT_MANIFEST, PYPROJECT_MANIFEST},
     project::{grouped_environment::GroupedEnvironment, manifest::ProjectManifest},
     pypi_mapping::MappingSource,
     utils::reqwest::build_reqwest_clients,
@@ -224,9 +224,10 @@ impl Project {
         let project_toml = match project_toml {
             Some(file) => file,
             None => miette::bail!(
-                "could not find {} or {} which is configured to use pixi",
+                "could not find {}, {}, or {} which is configured to use pixi",
                 PROJECT_MANIFEST,
-                PYPROJECT_MANIFEST
+                PYPROJECT_MANIFEST,
+                MOJOPROJECT_MANIFEST
             ),
         };
 
@@ -589,17 +590,19 @@ impl Project {
 
 /// Iterates over the current directory and all its parent directories and
 /// returns the manifest path in the first directory path that contains the
-/// [`consts::PROJECT_MANIFEST`] or [`consts::PYPROJECT_MANIFEST`].
+/// [`consts::PROJECT_MANIFEST`], [`consts::PYPROJECT_MANIFEST`],
+/// or [`consts::MOJOPROJECT_MANIFEST`] file.
 pub fn find_project_manifest() -> Option<PathBuf> {
     let current_dir = std::env::current_dir().ok()?;
     std::iter::successors(Some(current_dir.as_path()), |prev| prev.parent()).find_map(|dir| {
-        [PROJECT_MANIFEST, PYPROJECT_MANIFEST]
+        [PROJECT_MANIFEST, MOJOPROJECT_MANIFEST, PYPROJECT_MANIFEST]
             .iter()
             .find_map(|manifest| {
                 let path = dir.join(manifest);
                 if path.is_file() {
                     match *manifest {
                         PROJECT_MANIFEST => Some(path.to_path_buf()),
+                        MOJOPROJECT_MANIFEST => Some(path.to_path_buf()),
                         PYPROJECT_MANIFEST if PyProjectToml::is_pixi(&path) => {
                             Some(path.to_path_buf())
                         }

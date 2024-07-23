@@ -12,6 +12,7 @@ const PYPROJECT_PIXI_PREFIX: &str = "tool.pixi";
 /// Discriminates between a 'pixi.toml' and a 'pyproject.toml' manifest
 #[derive(Debug, Clone)]
 pub enum ManifestSource {
+    MojoProjectToml(toml_edit::DocumentMut),
     PyProjectToml(toml_edit::DocumentMut),
     PixiToml(toml_edit::DocumentMut),
 }
@@ -19,6 +20,7 @@ pub enum ManifestSource {
 impl fmt::Display for ManifestSource {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            ManifestSource::MojoProjectToml(document) => write!(f, "{}", document),
             ManifestSource::PyProjectToml(document) => write!(f, "{}", document),
             ManifestSource::PixiToml(document) => write!(f, "{}", document),
         }
@@ -42,6 +44,7 @@ impl ManifestSource {
     #[cfg(test)]
     fn file_name(&self) -> &'static str {
         match self {
+            ManifestSource::MojoProjectToml(_) => "mojoproject.toml",
             ManifestSource::PyProjectToml(_) => "pyproject.toml",
             ManifestSource::PixiToml(_) => "pixi.toml",
         }
@@ -162,6 +165,7 @@ impl ManifestSource {
 
     fn as_table_mut(&mut self) -> &mut Table {
         match self {
+            ManifestSource::MojoProjectToml(document) => document.as_table_mut(),
             ManifestSource::PyProjectToml(document) => document.as_table_mut(),
             ManifestSource::PixiToml(document) => document.as_table_mut(),
         }
@@ -270,7 +274,7 @@ impl ManifestSource {
                         .push(requirement.to_string())
                 }
             }
-            ManifestSource::PixiToml(_) => {
+            ManifestSource::PixiToml(_) | ManifestSource::MojoProjectToml(_) => {
                 let mut pypi_requirement = PyPiRequirement::from(requirement.clone());
                 if let Some(editable) = editable {
                     pypi_requirement.set_editable(editable);
