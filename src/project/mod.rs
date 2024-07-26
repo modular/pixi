@@ -199,10 +199,11 @@ impl Project {
         let project_toml = match project_toml {
             Some(file) => file,
             None => miette::bail!(
-                "could not find {}, {}, or {} which is configured to use pixi",
+                "could not find {}, {}, or {} which is configured to use {}",
                 consts::PROJECT_MANIFEST,
                 consts::PYPROJECT_MANIFEST,
                 consts::MOJOPROJECT_MANIFEST,
+                consts::PIXI_BIN_NAME
             ),
         };
 
