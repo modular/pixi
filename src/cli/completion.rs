@@ -1,4 +1,5 @@
 use crate::cli::Args as CommandArgs;
+use crate::consts;
 use clap::{CommandFactory, Parser};
 use miette::IntoDiagnostic;
 use regex::Regex;
@@ -14,7 +15,7 @@ pub struct Args {
 }
 
 /// Generate completions for the pixi cli, and print those to the stdout
-pub(crate) fn execute(args: Args) -> miette::Result<()> {
+pub fn execute(args: Args) -> miette::Result<()> {
     let clap_shell = args
         .shell
         .or(clap_complete::Shell::from_env())
@@ -41,39 +42,42 @@ pub(crate) fn execute(args: Args) -> miette::Result<()> {
 /// Generate the completion script using clap_complete for a specified shell.
 fn get_completion_script(shell: clap_complete::Shell) -> String {
     let mut buf = vec![];
-    clap_complete::generate(shell, &mut CommandArgs::command(), "pixi", &mut buf);
+    let bin_name = consts::PIXI_BIN_NAME.to_string();
+    clap_complete::generate(shell, &mut CommandArgs::command(), &bin_name, &mut buf);
     String::from_utf8(buf).expect("clap_complete did not generate a valid UTF8 script")
 }
 
 /// Replace the parts of the bash completion script that need different functionality.
 fn replace_bash_completion(script: &str) -> Cow<str> {
-    let pattern = r#"(?s)pixi__run\).*?opts="(.*?)".*?(if.*?fi)"#;
+    let pattern = r#"(?s)BIN_NAME__run\).*?opts="(.*?)".*?(if.*?fi)"#;
+    let bin_name = std::env::var("CARGO_BIN_NAME").unwrap_or("pixi".to_string());
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
-    let replacement = r#"pixi__run)
+    let replacement = r#"BIN_NAME__run)
             opts="$1"
             if [[ $${cur} == -* ]] ; then
                COMPREPLY=( $$(compgen -W "$${opts}" -- "$${cur}") )
                return 0
             elif [[ $${COMP_CWORD} -eq 2 ]]; then
-               local tasks=$$(pixi task list --machine-readable 2> /dev/null)
+               local tasks=$$(BIN_NAME task list --machine-readable 2> /dev/null)
                if [[ $$? -eq 0 ]]; then
                    COMPREPLY=( $$(compgen -W "$${tasks}" -- "$${cur}") )
                    return 0
                fi
             fi"#;
     let re = Regex::new(pattern).unwrap();
-    re.replace(script, replacement)
+    re.replace(script, replacement.replace("BIN_NAME", &bin_name))
 }
 
 /// Replace the parts of the bash completion script that need different functionality.
 fn replace_zsh_completion(script: &str) -> Cow<str> {
     let pattern = r"(?ms)(\(run\))(?:.*?)(_arguments.*?)(\*::task)";
+    let bin_name = std::env::var("CARGO_BIN_NAME").unwrap_or("pixi".to_string());
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
     let zsh_replacement = r#"$1
 local tasks
-tasks=("$${(@s/ /)$$(pixi task list --machine-readable 2> /dev/null)}")
+tasks=("$${(@s/ /)$$(BIN_NAME task list --machine-readable 2> /dev/null)}")
 
 if [[ -n "$$tasks" ]]; then
     _values 'task' "$${tasks[@]}"
@@ -83,7 +87,7 @@ fi
 $2::task"#;
 
     let re = Regex::new(pattern).unwrap();
-    re.replace(script, zsh_replacement)
+    re.replace(script, zsh_replacement.replace("BIN_NAME", &bin_name))
 }
 
 #[cfg(test)]

@@ -1,6 +1,10 @@
 use console::Style;
 use lazy_static::lazy_static;
-use std::fmt::{Display, Formatter};
+use std::{
+    ffi::OsStr,
+    fmt::{Display, Formatter},
+    path::Path,
+};
 use url::Url;
 
 pub const CONFIG_DIR: &'static str = match option_env!("PIXI_CONFIG_DIR") {
@@ -22,7 +26,16 @@ lazy_static! {
         Some(channels) => channels.split(',').map(|s| s.to_string()).collect(),
         None => vec!["conda-forge".to_string()],
     };
+
+    /// The name of the binary.
+    pub static ref PIXI_BIN_NAME: String = std::env::args().next()
+        .as_ref()
+        .map(Path::new)
+        .and_then(Path::file_name)
+        .and_then(OsStr::to_str)
+        .map(String::from).unwrap_or("pixi".to_string());
 }
+
 pub const PROJECT_MANIFEST: &str = "pixi.toml";
 pub const PYPROJECT_MANIFEST: &str = "pyproject.toml";
 pub const MOJOPROJECT_MANIFEST: &str = "mojoproject.toml";

@@ -412,7 +412,10 @@ impl Manifest {
     ) -> miette::Result<bool> {
         // Determine the name of the package to add
         let (Some(name), spec) = spec.clone().into_nameless() else {
-            miette::bail!("pixi does not support wildcard dependencies")
+            miette::bail!(format!(
+                "{} does not support wildcard dependencies",
+                consts::PIXI_BIN_NAME.to_string()
+            ));
         };
         let mut any_added = false;
         for platform in to_options(platforms) {
