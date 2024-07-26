@@ -58,7 +58,7 @@ impl Generator for Shell {
 }
 
 /// Generate completions for the pixi cli, and print those to the stdout
-pub(crate) fn execute(args: Args) -> miette::Result<()> {
+pub fn execute(args: Args) -> miette::Result<()> {
     // Generate the original completion script.
     let script = get_completion_script(args.shell);
 
@@ -82,7 +82,8 @@ pub(crate) fn execute(args: Args) -> miette::Result<()> {
 /// Generate the completion script using clap_complete for a specified shell.
 fn get_completion_script(shell: Shell) -> String {
     let mut buf = vec![];
-    clap_complete::generate(shell, &mut CommandArgs::command(), "pixi", &mut buf);
+    let bin_name = pixi_consts::consts::PIXI_BIN_NAME.to_string();
+    clap_complete::generate(shell, &mut CommandArgs::command(), &bin_name, &mut buf);
     String::from_utf8(buf).expect("clap_complete did not generate a valid UTF8 script")
 }
 
@@ -90,21 +91,22 @@ fn get_completion_script(shell: Shell) -> String {
 fn replace_bash_completion(script: &str) -> Cow<str> {
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
-    let pattern = r#"(?s)pixi__run\).*?opts="(.*?)".*?(if.*?fi)"#;
-    let replacement = r#"pixi__run)
+    let pattern = r#"(?s)BIN_NAME__run\).*?opts="(.*?)".*?(if.*?fi)"#;
+    let bin_name = pixi_consts::consts::PIXI_BIN_NAME.to_string();
+    let replacement = r#"BIN_NAME__run)
             opts="$1"
             if [[ $${cur} == -* ]] ; then
                COMPREPLY=( $$(compgen -W "$${opts}" -- "$${cur}") )
                return 0
             elif [[ $${COMP_CWORD} -eq 2 ]]; then
-               local tasks=$$(pixi task list --machine-readable 2> /dev/null)
+               local tasks=$$(BIN_NAME task list --machine-readable 2> /dev/null)
                if [[ $$? -eq 0 ]]; then
                    COMPREPLY=( $$(compgen -W "$${tasks}" -- "$${cur}") )
                    return 0
                fi
             fi"#;
     let re = Regex::new(pattern).unwrap();
-    re.replace(script, replacement)
+    re.replace(script, replacement.replace("BIN_NAME", &bin_name))
 }
 
 /// Replace the parts of the zsh completion script that need different functionality.
@@ -112,9 +114,10 @@ fn replace_zsh_completion(script: &str) -> Cow<str> {
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
     let pattern = r"(?ms)(\(run\))(?:.*?)(_arguments.*?)(\*::task)";
+    let bin_name: String = pixi_consts::consts::PIXI_BIN_NAME.to_string();
     let replacement = r#"$1
 local tasks
-tasks=("$${(@s/ /)$$(pixi task list --machine-readable 2> /dev/null)}")
+tasks=("$${(@s/ /)$$(BIN_NAME task list --machine-readable 2> /dev/null)}")
 
 if [[ -n "$$tasks" ]]; then
     _values 'task' "$${tasks[@]}"
@@ -124,17 +127,18 @@ fi
 $2::task"#;
 
     let re = Regex::new(pattern).unwrap();
-    re.replace(script, replacement)
+    re.replace(script, replacement.replace("BIN_NAME", &bin_name))
 }
 
 fn replace_fish_completion(script: &str) -> Cow<str> {
     // Adds tab completion to the pixi run command.
-    let addition = "complete -c pixi -n \"__fish_seen_subcommand_from run\" -f -a \"(string split ' ' (pixi task list --machine-readable  2> /dev/null))\"";
+    let bin_name = pixi_consts::consts::PIXI_BIN_NAME.to_string();
+    let addition = "complete -c BIN_NAME -n \"__fish_seen_subcommand_from run\" -f -a \"(string split ' ' (BIN_NAME task list --machine-readable  2> /dev/null))\"";
     let new_script = format!("{}{}\n", script, addition);
     let pattern = r#"-n "__fish_seen_subcommand_from run""#;
     let replacement = r#"-n "__fish_seen_subcommand_from run; or __fish_seen_subcommand_from r""#;
     let re = Regex::new(pattern).unwrap();
-    let result = re.replace_all(&new_script, replacement);
+    let result = re.replace_all(&new_script, replacement.replace("BIN_NAME", &bin_name));
     Cow::Owned(result.into_owned())
 }
 
@@ -142,20 +146,21 @@ fn replace_fish_completion(script: &str) -> Cow<str> {
 fn replace_nushell_completion(script: &str) -> Cow<str> {
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
-    let pattern = r#"(#.*\n  export extern "pixi run".*\n.*...task: string)([^\]]*--environment\(-e\): string)"#;
+    let bin_name = pixi_consts::consts::PIXI_BIN_NAME.to_string();
+    let pattern = r#"(#.*\n  export extern "BIN_NAME run".*\n.*...task: string)([^\]]*--environment\(-e\): string)"#;
     let replacement = r#"
-  def "nu-complete pixi run" [] {
-    ^pixi info --json | from json | get environments_info | get tasks | flatten | uniq
+  def "nu-complete BIN_NAME run" [] {
+    ^BIN_NAME info --json | from json | get environments_info | get tasks | flatten | uniq
   }
 
-  def "nu-complete pixi run environment" [] {
-    ^pixi info --json | from json | get environments_info | get name
+  def "nu-complete BIN_NAME run environment" [] {
+    ^BIN_NAME info --json | from json | get environments_info | get name
   }
 
-  ${1}@"nu-complete pixi run"${2}@"nu-complete pixi run environment""#;
+  ${1}@"nu-complete BIN_NAME run"${2}@"nu-complete BIN_NAME run environment""#;
 
     let re = Regex::new(pattern).unwrap();
-    re.replace(script, replacement)
+    re.replace(script, replacement.replace("BIN_NAME", &bin_name))
 }
 
 #[cfg(test)]
