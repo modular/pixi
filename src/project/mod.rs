@@ -228,7 +228,7 @@ impl Project {
                 PROJECT_MANIFEST,
                 PYPROJECT_MANIFEST,
                 MOJOPROJECT_MANIFEST,
-                std::env::var("CARGO_BIN_NAME").unwrap_or_else(|_| "pixi".to_string())  
+                consts::PIXI_BIN_NAME.to_string()
             ),
         };
 

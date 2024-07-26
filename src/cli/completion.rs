@@ -50,7 +50,7 @@ fn get_completion_script(shell: clap_complete::Shell) -> String {
 /// Replace the parts of the bash completion script that need different functionality.
 fn replace_bash_completion(script: &str) -> Cow<str> {
     let pattern = r#"(?s)BIN_NAME__run\).*?opts="(.*?)".*?(if.*?fi)"#;
-    let bin_name = std::env::var("CARGO_BIN_NAME").unwrap_or("pixi".to_string());
+    let bin_name = consts::PIXI_BIN_NAME.to_string();
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
     let replacement = r#"BIN_NAME__run)
@@ -72,7 +72,7 @@ fn replace_bash_completion(script: &str) -> Cow<str> {
 /// Replace the parts of the bash completion script that need different functionality.
 fn replace_zsh_completion(script: &str) -> Cow<str> {
     let pattern = r"(?ms)(\(run\))(?:.*?)(_arguments.*?)(\*::task)";
-    let bin_name = std::env::var("CARGO_BIN_NAME").unwrap_or("pixi".to_string());
+    let bin_name = consts::PIXI_BIN_NAME.to_string();
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
     let zsh_replacement = r#"$1
