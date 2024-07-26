@@ -203,7 +203,7 @@ impl Project {
                 consts::PROJECT_MANIFEST,
                 consts::PYPROJECT_MANIFEST,
                 consts::MOJOPROJECT_MANIFEST,
-                consts::PIXI_BIN_NAME
+                consts::PIXI_BIN_NAME.to_string()
             ),
         };
 

@@ -243,7 +243,6 @@ pub async fn execute() -> miette::Result<()> {
         .with_writer(IndicatifWriter::new(pixi_progress::global_multi_progress()))
         .without_time();
 
-
     tracing_subscriber::registry()
         .with(env_filter)
         .with(fmt_layer)
