@@ -224,10 +224,11 @@ impl Project {
         let project_toml = match project_toml {
             Some(file) => file,
             None => miette::bail!(
-                "could not find {}, {}, or {} which is configured to use pixi",
+                "could not find {}, {}, or {} which is configured to use {}",
                 PROJECT_MANIFEST,
                 PYPROJECT_MANIFEST,
-                MOJOPROJECT_MANIFEST
+                MOJOPROJECT_MANIFEST,
+                std::env::var("CARGO_BIN_NAME").unwrap_or_else(|_| "pixi".to_string())  
             ),
         };
 
