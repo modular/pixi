@@ -228,6 +228,7 @@ impl PixiControl {
                 env_file: None,
                 format: None,
                 pyproject_toml: false,
+                mojoproject_toml: false,
             },
         }
     }
@@ -245,6 +246,7 @@ impl PixiControl {
                 env_file: None,
                 format: None,
                 pyproject_toml: false,
+                mojoproject_toml: false,
             },
         }
     }
