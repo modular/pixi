@@ -361,7 +361,8 @@ pub async fn execute(args: Args) -> miette::Result<()> {
             save_manifest_file(&pyproject_manifest_path, rv)?;
         // Create a 'pixi.toml' manifest
         } else {
-            let path = if args.mojoproject_toml || args.format == Some(ManifestFormat::Mojoproject) {
+            let path = if args.mojoproject_toml || args.format == Some(ManifestFormat::Mojoproject)
+            {
                 mojoproject_manifest_path
             } else {
                 pixi_manifest_path

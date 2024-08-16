@@ -639,26 +639,30 @@ impl<'source> HasManifestRef<'source> for &'source Project {
 pub fn find_project_manifest() -> Option<PathBuf> {
     let current_dir = std::env::current_dir().ok()?;
     std::iter::successors(Some(current_dir.as_path()), |prev| prev.parent()).find_map(|dir| {
-        [consts::PROJECT_MANIFEST, consts::MOJOPROJECT_MANIFEST, consts::PYPROJECT_MANIFEST]
-            .iter()
-            .find_map(|manifest| {
-                let path = dir.join(manifest);
-                if path.is_file() {
-                    match *manifest {
-                        consts::PROJECT_MANIFEST => Some(path.to_path_buf()),
-                        consts::MOJOPROJECT_MANIFEST => Some(path.to_path_buf()),
-                        consts::PYPROJECT_MANIFEST
-                            if PyProjectManifest::from_path(&path)
-                                .is_ok_and(|project| project.is_pixi()) =>
-                        {
-                            Some(path.to_path_buf())
-                        }
-                        _ => None,
+        [
+            consts::PROJECT_MANIFEST,
+            consts::MOJOPROJECT_MANIFEST,
+            consts::PYPROJECT_MANIFEST,
+        ]
+        .iter()
+        .find_map(|manifest| {
+            let path = dir.join(manifest);
+            if path.is_file() {
+                match *manifest {
+                    consts::PROJECT_MANIFEST => Some(path.to_path_buf()),
+                    consts::MOJOPROJECT_MANIFEST => Some(path.to_path_buf()),
+                    consts::PYPROJECT_MANIFEST
+                        if PyProjectManifest::from_path(&path)
+                            .is_ok_and(|project| project.is_pixi()) =>
+                    {
+                        Some(path.to_path_buf())
                     }
-                } else {
-                    None
+                    _ => None,
                 }
-            })
+            } else {
+                None
+            }
+        })
     })
 }
 

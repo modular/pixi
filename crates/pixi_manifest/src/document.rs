@@ -270,7 +270,7 @@ impl ManifestSource {
                         .push(requirement.to_string())
                 }
             }
-            ManifestSource::PixiToml(_) |  ManifestSource::MojoProjectToml(_) => {
+            ManifestSource::PixiToml(_) | ManifestSource::MojoProjectToml(_) => {
                 let mut pypi_requirement = PyPiRequirement::try_from(requirement.clone())?;
                 if let Some(editable) = editable {
                     pypi_requirement.set_editable(editable);
