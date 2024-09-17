@@ -46,7 +46,7 @@ pub async fn execute(args: Args) -> miette::Result<()> {
         .with_cli_config(config.clone());
 
     if project_original.environment(&args.environment).is_none() {
-        miette::bail!("Environment {} doesn't exist. You can create a new environment with `pixi global install`.", &args.environment);
+        miette::bail!("Environment {} doesn't exist. You can create a new environment with `{pixi} global install`.", &args.environment, pixi=pixi_utils::executable_name());
     }
 
     async fn apply_changes(

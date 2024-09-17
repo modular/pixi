@@ -59,7 +59,7 @@ pub struct Args {
     config: ConfigCli,
 
     /// Specifies that the packages should be reinstalled even if they are already installed.
-    #[arg(action, long)]
+    #[arg(action, short = 'u', long)]
     force_reinstall: bool,
 }
 

@@ -28,6 +28,7 @@ use crate::workspace::WorkspaceMut;
 pub enum ManifestFormat {
     Pixi,
     Pyproject,
+    Mojoproject,
 }
 
 /// Creates a new workspace
@@ -50,7 +51,7 @@ pub struct Args {
     pub env_file: Option<PathBuf>,
 
     /// The manifest format to create.
-    #[arg(long, conflicts_with_all = ["env_file", "pyproject_toml"], ignore_case = true)]
+    #[arg(long, conflicts_with_all = ["env_file", "pyproject_toml", "mojoproject_toml"], ignore_case = true)]
     pub format: Option<ManifestFormat>,
 
     /// Create a pyproject.toml manifest instead of a pixi.toml manifest
@@ -61,9 +62,14 @@ pub struct Args {
     /// Source Control Management used for this project
     #[arg(short = 's', long = "scm", ignore_case = true)]
     pub scm: Option<GitAttributes>,
+
+    /// Create a mojoproject.toml manifest instead of a pixi.toml manifest
+    // BREAK (Magic alpha): Remove this option from the cli in favor of the `format` option.
+    #[arg(long, conflicts_with_all = ["env_file", "format"], alias = "mojoproject", hide = true)]
+    pub mojoproject_toml: bool,
 }
 
-/// The pixi.toml template
+/// The pixi.toml/mojoproject.toml template
 ///
 /// This uses a template just to simplify the flexibility of emitting it.
 const PROJECT_TEMPLATE: &str = r#"[project]
@@ -192,6 +198,7 @@ pub async fn execute(args: Args) -> miette::Result<()> {
     let dir = args.path.canonicalize().into_diagnostic()?;
     let pixi_manifest_path = dir.join(consts::PROJECT_MANIFEST);
     let pyproject_manifest_path = dir.join(consts::PYPROJECT_MANIFEST);
+    let mojoproject_manifest_path = dir.join(consts::MOJOPROJECT_MANIFEST);
     let gitignore_path = dir.join(".gitignore");
     let gitattributes_path = dir.join(".gitattributes");
     let config = Config::load_global();
@@ -429,9 +436,15 @@ pub async fn execute(args: Args) -> miette::Result<()> {
 
         // Create a 'pixi.toml' manifest
         } else {
-            // Check if the 'pixi.toml' file doesn't already exist. We don't want to
-            // overwrite it.
-            if pixi_manifest_path.is_file() {
+            let path = if args.mojoproject_toml || args.format == Some(ManifestFormat::Mojoproject)
+            {
+                mojoproject_manifest_path
+            } else {
+                pixi_manifest_path
+            };
+
+            // Check if the manifest file doesn't already exist. We don't want to overwrite it.
+            if path.is_file() {
                 miette::bail!("{} already exists", consts::PROJECT_MANIFEST);
             }
             let rv = render_project(
@@ -445,7 +458,7 @@ pub async fn execute(args: Args) -> miette::Result<()> {
                 &extra_index_urls,
                 None,
             );
-            save_manifest_file(&pixi_manifest_path, rv)?;
+            save_manifest_file(&path, rv)?;
         };
     }
 
@@ -528,7 +541,7 @@ fn get_name_from_dir(path: &Path) -> miette::Result<String> {
 
 // When the specific template is not in the file or the file does not exist.
 // Make the file and append the template to the file.
-fn create_or_append_file(path: &Path, template: &str) -> std::io::Result<()> {
+pub fn create_or_append_file(path: &Path, template: &str) -> std::io::Result<()> {
     let file = fs_err::read_to_string(path).unwrap_or_default();
 
     if !file.contains(template) {
