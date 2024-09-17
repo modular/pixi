@@ -12,7 +12,7 @@ use tracing_subscriber::{
 };
 
 pub mod add;
-mod build;
+pub mod build;
 pub mod clean;
 pub mod cli_config;
 pub mod completion;
