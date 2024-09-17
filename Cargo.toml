@@ -47,7 +47,7 @@ humantime = "2.1.0"
 ignore = "0.4.22"
 indexmap = "2.2.6"
 indicatif = "0.17.8"
-insta = "1.38.0"
+insta = { version = "1.39.0", features = ["filters"] }
 is_executable = "1.0.1"
 itertools = "0.13.0"
 jsonrpsee = "=0.24.2"
@@ -308,7 +308,7 @@ uv-git = { workspace = true }
 uv-installer = { workspace = true }
 uv-normalize = { workspace = true }
 uv-python = { workspace = true }
-uv-requirements = { workspace = true }
+uv-requirements = { workspace = true } 
 uv-resolver = { workspace = true }
 uv-types = { workspace = true }
 xxhash-rust = { workspace = true }
