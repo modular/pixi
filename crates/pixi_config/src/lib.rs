@@ -90,7 +90,7 @@ pub fn get_cache_dir() -> miette::Result<PathBuf> {
                     || dirs::home_dir().map(|d| d.join(".cache")),
                     |p| Some(PathBuf::from(p)),
                 )
-                .map(|d| d.join("pixi"));
+                .map(|d| d.join(consts::PIXI_DIR));
 
             // Only use the xdg cache pixi directory when it exists
             xdg_cache_pixi_dir
@@ -921,7 +921,7 @@ pub fn config_path_system() -> PathBuf {
     #[cfg(not(target_os = "windows"))]
     let base_path = PathBuf::from("/etc");
 
-    base_path.join("pixi").join(consts::CONFIG_FILE)
+    base_path.join(consts::CONFIG_DIR).join(consts::CONFIG_FILE)
 }
 
 /// Returns the path(s) to the global pixi config file.
@@ -932,8 +932,8 @@ pub fn config_path_global() -> Vec<PathBuf> {
     );
 
     vec![
-        xdg_config_home.map(|d| d.join("pixi").join(consts::CONFIG_FILE)),
-        dirs::config_dir().map(|d| d.join("pixi").join(consts::CONFIG_FILE)),
+        xdg_config_home.map(|d| d.join(consts::CONFIG_DIR).join(consts::CONFIG_FILE)),
+        dirs::config_dir().map(|d| d.join(consts::CONFIG_DIR).join(consts::CONFIG_FILE)),
         home_path().map(|d| d.join(consts::CONFIG_FILE)),
     ]
     .into_iter()

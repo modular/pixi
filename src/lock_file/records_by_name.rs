@@ -32,6 +32,7 @@ impl HasNameVersion for PypiRecord {
         &self.0.version
     }
 }
+#[allow(refining_impl_trait)]
 impl HasNameVersion for RepoDataRecord {
     type N = PackageName;
     type V = VersionWithSource;

@@ -196,9 +196,11 @@ impl Project {
         let project_toml = match project_toml {
             Some(file) => file,
             None => miette::bail!(
-                "could not find {} or {} which is configured to use pixi",
+                "could not find {}, {}, or {} which is configured to use {}",
                 consts::PROJECT_MANIFEST,
-                consts::PYPROJECT_MANIFEST
+                consts::PYPROJECT_MANIFEST,
+                consts::MOJOPROJECT_MANIFEST,
+                consts::PIXI_BIN_NAME.to_string()
             ),
         };
 
@@ -399,7 +401,7 @@ impl Project {
 
     /// Returns an environment in this project based on a name or an environment
     /// variable.
-    pub(crate) fn environment_from_name_or_env_var(
+    pub fn environment_from_name_or_env_var(
         &self,
         name: Option<String>,
     ) -> miette::Result<Environment> {
@@ -597,29 +599,35 @@ impl<'source> HasManifestRef<'source> for &'source Project {
 
 /// Iterates over the current directory and all its parent directories and
 /// returns the manifest path in the first directory path that contains the
-/// [`consts::PROJECT_MANIFEST`] or [`consts::PYPROJECT_MANIFEST`].
+/// [`consts::PROJECT_MANIFEST`], [`consts::PYPROJECT_MANIFEST`],
+/// or [`consts::MOJOPROJECT_MANIFEST`] file.
 pub(crate) fn find_project_manifest() -> Option<PathBuf> {
     let current_dir = std::env::current_dir().ok()?;
     std::iter::successors(Some(current_dir.as_path()), |prev| prev.parent()).find_map(|dir| {
-        [consts::PROJECT_MANIFEST, consts::PYPROJECT_MANIFEST]
-            .iter()
-            .find_map(|manifest| {
-                let path = dir.join(manifest);
-                if path.is_file() {
-                    match *manifest {
-                        consts::PROJECT_MANIFEST => Some(path.to_path_buf()),
-                        consts::PYPROJECT_MANIFEST
-                            if PyProjectManifest::from_path(&path)
-                                .is_ok_and(|project| project.is_pixi()) =>
-                        {
-                            Some(path.to_path_buf())
-                        }
-                        _ => None,
+        [
+            consts::PROJECT_MANIFEST,
+            consts::MOJOPROJECT_MANIFEST,
+            consts::PYPROJECT_MANIFEST,
+        ]
+        .iter()
+        .find_map(|manifest| {
+            let path = dir.join(manifest);
+            if path.is_file() {
+                match *manifest {
+                    consts::PROJECT_MANIFEST => Some(path.to_path_buf()),
+                    consts::MOJOPROJECT_MANIFEST => Some(path.to_path_buf()),
+                    consts::PYPROJECT_MANIFEST
+                        if PyProjectManifest::from_path(&path)
+                            .is_ok_and(|project| project.is_pixi()) =>
+                    {
+                        Some(path.to_path_buf())
                     }
-                } else {
-                    None
+                    _ => None,
                 }
-            })
+            } else {
+                None
+            }
+        })
     })
 }
 
