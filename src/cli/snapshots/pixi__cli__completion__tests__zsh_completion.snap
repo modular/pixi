@@ -1,8 +1,8 @@
 ---
 source: src/cli/completion.rs
+assertion_line: 209
 expression: result
 ---
-
 (add)
 _arguments "${_arguments_options[@]}" \
 '--manifest-path=[The path to '\''pixi.toml'\'']:MANIFEST_PATH:_files' \
@@ -11,7 +11,7 @@ _arguments "${_arguments_options[@]}" \
 ;;
 (run)
 local tasks
-tasks=("${(@s/ /)$(pixi task list --machine-readable 2> /dev/null)}")
+tasks=("${(@s/ /)$(pixi-2efee7e6c430eef0 task list --machine-readable 2> /dev/null)}")
 
 if [[ -n "$tasks" ]]; then
     _values 'task' "${tasks[@]}"
@@ -44,5 +44,3 @@ _arguments "${_arguments_options[@]}" \
 _arguments "${_arguments_options[@]}" \
 && ret=0
 ;;
-
-
