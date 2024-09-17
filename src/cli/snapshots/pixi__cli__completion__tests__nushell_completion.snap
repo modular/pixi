@@ -1,7 +1,6 @@
 ---
 source: src/cli/completion.rs
 expression: result
-snapshot_kind: text
 ---
   # Runs task in project
   export extern "pixi run" [
