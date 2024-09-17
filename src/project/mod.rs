@@ -231,9 +231,10 @@ impl Project {
         }
 
         miette::bail!(
-            "could not find {} or {} which is configured to use {}",
+            "could not find {}, {}, or {} which is configured to use {}",
             consts::PROJECT_MANIFEST,
             consts::PYPROJECT_MANIFEST,
+            consts::MOJOPROJECT_MANIFEST,
             pixi_utils::executable_name()
         );
     }
@@ -1066,9 +1067,14 @@ impl<'source> HasManifestRef<'source> for &'source Project {
 
 /// Iterates over the current directory and all its parent directories and
 /// returns the manifest path in the first directory path that contains the
-/// [`consts::PROJECT_MANIFEST`] or [`consts::PYPROJECT_MANIFEST`].
+///  [`consts::PROJECT_MANIFEST`], [`consts::PYPROJECT_MANIFEST`],
+/// or [`consts::MOJOPROJECT_MANIFEST`] file.
 pub(crate) fn find_project_manifest(current_dir: impl AsRef<Path>) -> Option<PathBuf> {
-    let manifests = [consts::PROJECT_MANIFEST, consts::PYPROJECT_MANIFEST];
+    let manifests = [
+        consts::PROJECT_MANIFEST,
+        consts::MOJOPROJECT_MANIFEST,
+        consts::PYPROJECT_MANIFEST,
+    ];
 
     for dir in current_dir.as_ref().ancestors() {
         for manifest in &manifests {
@@ -1078,6 +1084,7 @@ pub(crate) fn find_project_manifest(current_dir: impl AsRef<Path>) -> Option<Pat
             }
 
             match *manifest {
+                consts::MOJOPROJECT_MANIFEST => return Some(path),
                 consts::PROJECT_MANIFEST => return Some(path),
                 consts::PYPROJECT_MANIFEST => {
                     if let Ok(content) = fs_err::read_to_string(&path) {

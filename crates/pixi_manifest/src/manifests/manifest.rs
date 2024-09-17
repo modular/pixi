@@ -42,6 +42,7 @@ impl ManifestKind {
         match path.file_name().and_then(OsStr::to_str)? {
             consts::PROJECT_MANIFEST => Some(Self::Pixi),
             consts::PYPROJECT_MANIFEST => Some(Self::Pyproject),
+            consts::MOJOPROJECT_MANIFEST => Some(Self::Pixi),
             _ => None,
         }
     }
@@ -95,6 +96,7 @@ impl Manifest {
         match self.source {
             ManifestSource::PixiToml(_) => consts::PROJECT_MANIFEST,
             ManifestSource::PyProjectToml(_) => consts::PYPROJECT_MANIFEST,
+            ManifestSource::MojoProjectToml(_) => consts::MOJOPROJECT_MANIFEST,
         }
     }
 
