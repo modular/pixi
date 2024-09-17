@@ -8,6 +8,7 @@ use uv_normalize::{ExtraName, InvalidNameError, PackageName};
 /// Defines information about a Pypi package extracted from either a python package or from a
 /// conda package. That can be used for comparison in both
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct PypiPackageIdentifier {
     pub name: PyPiPackageName,
     pub version: pep440_rs::Version,

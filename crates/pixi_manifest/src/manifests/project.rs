@@ -99,6 +99,7 @@ impl TableName<'_> {
 /// Discriminates between a 'pixi.toml' and a 'pyproject.toml' manifest
 #[derive(Debug, Clone)]
 pub enum ManifestSource {
+    MojoProjectToml(TomlManifest),
     PyProjectToml(TomlManifest),
     PixiToml(TomlManifest),
 }
@@ -106,6 +107,7 @@ pub enum ManifestSource {
 impl fmt::Display for ManifestSource {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            ManifestSource::MojoProjectToml(document) => write!(f, "{}", document.0),
             ManifestSource::PyProjectToml(document) => write!(f, "{}", document.0),
             ManifestSource::PixiToml(document) => write!(f, "{}", document.0),
         }
@@ -129,6 +131,7 @@ impl ManifestSource {
     #[cfg(test)]
     fn file_name(&self) -> &'static str {
         match self {
+            ManifestSource::MojoProjectToml(_) => "mojoproject.toml",
             ManifestSource::PyProjectToml(_) => "pyproject.toml",
             ManifestSource::PixiToml(_) => "pixi.toml",
         }
@@ -136,6 +139,7 @@ impl ManifestSource {
 
     fn table_prefix(&self) -> Option<&'static str> {
         match self {
+            ManifestSource::MojoProjectToml(_) => None,
             ManifestSource::PyProjectToml(_) => Some(PYPROJECT_PIXI_PREFIX),
             ManifestSource::PixiToml(_) => None,
         }
@@ -143,6 +147,7 @@ impl ManifestSource {
 
     fn manifest(&mut self) -> &mut TomlManifest {
         match self {
+            ManifestSource::MojoProjectToml(document) => document,
             ManifestSource::PyProjectToml(document) => document,
             ManifestSource::PixiToml(document) => document,
         }
@@ -171,6 +176,7 @@ impl ManifestSource {
 
     fn as_table_mut(&mut self) -> &mut Table {
         match self {
+            ManifestSource::MojoProjectToml(document) => document.0.as_table_mut(),
             ManifestSource::PyProjectToml(document) => document.0.as_table_mut(),
             ManifestSource::PixiToml(document) => document.0.as_table_mut(),
         }
@@ -305,7 +311,7 @@ impl ManifestSource {
                         .push(requirement.to_string())
                 }
             }
-            ManifestSource::PixiToml(_) => {
+            ManifestSource::PixiToml(_) | ManifestSource::MojoProjectToml(_) => {
                 let mut pypi_requirement =
                     PyPiRequirement::try_from(requirement.clone()).map_err(Box::new)?;
                 if let Some(editable) = editable {
