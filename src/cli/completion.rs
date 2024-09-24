@@ -147,7 +147,7 @@ fn replace_nushell_completion(script: &str) -> Cow<str> {
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
     let bin_name = pixi_consts::consts::PIXI_BIN_NAME.to_string();
-    let pattern = r#"(#.*\n  export extern "BIN_NAME run".*\n.*...task: string)([^\]]*--environment\(-e\): string)"#;
+    let pattern = format!(r#"(#.*\n  export extern "{} run".*\n.*...task: string)([^\]]*--environment\(-e\): string)"#, bin_name);
     let replacement = r#"
   def "nu-complete BIN_NAME run" [] {
     ^BIN_NAME info --json | from json | get environments_info | get tasks | flatten | uniq
@@ -159,7 +159,7 @@ fn replace_nushell_completion(script: &str) -> Cow<str> {
 
   ${1}@"nu-complete BIN_NAME run"${2}@"nu-complete BIN_NAME run environment""#;
 
-    let re = Regex::new(pattern).unwrap();
+    let re = Regex::new(pattern.as_str()).unwrap();
     re.replace(script, replacement.replace("BIN_NAME", &bin_name))
 }
 
@@ -284,6 +284,7 @@ _arguments "${_arguments_options[@]}" \
     pub(crate) fn test_bash_completion_working_regex() {
         // Generate the original completion script.
         let script = get_completion_script(Shell::Bash);
+        
         // Test if there was a replacement done on the clap generated completions
         assert_ne!(replace_bash_completion(&script), script);
     }
