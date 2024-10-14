@@ -91,8 +91,11 @@ fn get_completion_script(shell: Shell) -> String {
 fn replace_bash_completion(script: &str) -> Cow<str> {
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
-    let bin_name: String = pixi_consts::consts::PIXI_BIN_NAME.to_string();
-    let pattern = r#"(?s)BIN_NAME__run\).*?opts="(.*?)".*?(if.*?fi)"#;
+    // Replace the '-' with '__' since that's what clap's generator does as well  for Bash Shell completion.
+    let bin_name: String = pixi_consts::consts::PIXI_BIN_NAME
+        .to_string()
+        .replace('-', "__");
+    let pattern = format!(r#"(?s){}__run\).*?opts="(.*?)".*?(if.*?fi)"#, &bin_name);
     let replacement = r#"BIN_NAME__run)
             opts="$1"
             if [[ $${cur} == -* ]] ; then
@@ -105,7 +108,7 @@ fn replace_bash_completion(script: &str) -> Cow<str> {
                    return 0
                fi
             fi"#;
-    let re = Regex::new(pattern).unwrap();
+    let re = Regex::new(pattern.as_str()).unwrap();
     re.replace(script, replacement.replace("BIN_NAME", &bin_name))
 }
 
@@ -147,7 +150,10 @@ fn replace_nushell_completion(script: &str) -> Cow<str> {
     // Adds tab completion to the pixi run command.
     // NOTE THIS IS FORMATTED BY HAND
     let bin_name = pixi_consts::consts::PIXI_BIN_NAME.to_string();
-    let pattern = format!(r#"(#.*\n  export extern "{} run".*\n.*...task: string)([^\]]*--environment\(-e\): string)"#, bin_name);
+    let pattern = format!(
+        r#"(#.*\n  export extern "{} run".*\n.*...task: string)([^\]]*--environment\(-e\): string)"#,
+        bin_name
+    );
     let replacement = r#"
   def "nu-complete BIN_NAME run" [] {
     ^BIN_NAME info --json | from json | get environments_info | get tasks | flatten | uniq
@@ -206,7 +212,13 @@ _arguments "${_arguments_options[@]}" \
 
         "#;
         let result = replace_zsh_completion(script);
-        insta::assert_snapshot!(result);
+        let replacement = format!("{} task list", pixi_consts::consts::PIXI_BIN_NAME.as_str());
+        println!("{}", result);
+        insta::with_settings!({filters => vec![
+            (replacement.as_str(), "pixi task list"),
+        ]}, {
+            insta::assert_snapshot!(result);
+        });
     }
 
     #[test]
@@ -284,7 +296,7 @@ _arguments "${_arguments_options[@]}" \
     pub(crate) fn test_bash_completion_working_regex() {
         // Generate the original completion script.
         let script = get_completion_script(Shell::Bash);
-        
+
         // Test if there was a replacement done on the clap generated completions
         assert_ne!(replace_bash_completion(&script), script);
     }
