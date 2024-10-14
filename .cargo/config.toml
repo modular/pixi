@@ -1,5 +1,8 @@
 [env]
+PIXI_CONFIG_DIR = "pixi"
 PIXI_PROJECT_LOCK_FILE = "pixi.lock"
+PIXI_DEFAULT_CHANNELS = "conda-forge"
+PIXI_DIR = ".pixi"
 
 [target.x86_64-pc-windows-msvc]
 linker = "rust-lld"
