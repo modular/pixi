@@ -697,7 +697,13 @@ impl Config {
         if self.default_channels.is_empty() {
             consts::DEFAULT_CHANNELS
                 .iter()
-                .map(|s| NamedChannelOrUrl::Name(s.to_string()))
+                .map(|s| {
+                    if s.starts_with("http://") || s.starts_with("https://") {
+                        NamedChannelOrUrl::Url(Url::parse(s).unwrap())
+                    } else {
+                        NamedChannelOrUrl::Name(s.to_string())
+                    }
+                })
                 .collect()
         } else {
             self.default_channels.clone()
