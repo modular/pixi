@@ -409,6 +409,13 @@ pub struct Config {
     /// it back to the .pixi folder.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub detached_environments: Option<DetachedEnvironments>,
+
+    /// If set to true, pixi will set the PS1 environment variable to a custom
+    /// value.
+    #[serde(default)]
+    #[serde(alias = "email")] // BREAK: remove to stop supporting snake_case alias
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
 }
 
 impl Default for Config {
@@ -425,6 +432,7 @@ impl Default for Config {
             pypi_config: PyPIConfig::default(),
             detached_environments: Some(DetachedEnvironments::default()),
             pinning_strategy: Default::default(),
+            email: None,
         }
     }
 }
@@ -660,6 +668,7 @@ impl Config {
             "pypi-config.index-url",
             "pypi-config.extra-index-urls",
             "pypi-config.keyring-provider",
+            "email",
         ]
     }
 
@@ -688,6 +697,7 @@ impl Config {
             pypi_config: other.pypi_config.merge(self.pypi_config),
             detached_environments: other.detached_environments.or(self.detached_environments),
             pinning_strategy: other.pinning_strategy.or(self.pinning_strategy),
+            email: other.email.or(self.email),
         }
     }
 
@@ -775,6 +785,9 @@ impl Config {
             }
             "change-ps1" => {
                 self.change_ps1 = value.map(|v| v.parse()).transpose().into_diagnostic()?;
+            }
+            "email" => {
+                self.email = value.map(|v| v.parse()).transpose().into_diagnostic()?;
             }
             "authentication-override-file" => {
                 self.authentication_override_file = value.map(PathBuf::from);
