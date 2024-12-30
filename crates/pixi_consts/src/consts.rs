@@ -38,6 +38,8 @@ pub const _CACHED_BUILD_ENVS_DIR: &str = "cached-build-envs-v0";
 pub const CACHED_BUILD_TOOL_ENVS_DIR: &str = "cached-build-tool-envs-v0";
 pub const CACHED_GIT_DIR: &str = "git-cache-v0";
 
+pub const MOJOPROJECT_MANIFEST: &str = "mojoproject.toml";
+
 pub const CONFIG_DIR: &str = match option_env!("PIXI_CONFIG_DIR") {
     Some(dir) => dir,
     None => "pixi",
