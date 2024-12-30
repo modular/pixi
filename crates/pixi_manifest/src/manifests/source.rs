@@ -14,6 +14,7 @@ use crate::{
 /// Discriminates between a 'pixi.toml' and a 'pyproject.toml' manifest.
 #[derive(Debug, Clone)]
 pub enum ManifestSource {
+    MojoProjectToml(TomlDocument),
     PyProjectToml(TomlDocument),
     PixiToml(TomlDocument),
 }
@@ -21,6 +22,7 @@ pub enum ManifestSource {
 impl fmt::Display for ManifestSource {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            ManifestSource::MojoProjectToml(document) => write!(f, "{}", document),
             ManifestSource::PyProjectToml(document) => write!(f, "{}", document),
             ManifestSource::PixiToml(document) => write!(f, "{}", document),
         }
@@ -44,6 +46,7 @@ impl ManifestSource {
     #[cfg(test)]
     fn file_name(&self) -> &'static str {
         match self {
+            ManifestSource::MojoProjectToml(_) => "mojoproject.toml",
             ManifestSource::PyProjectToml(_) => "pyproject.toml",
             ManifestSource::PixiToml(_) => "pixi.toml",
         }
@@ -51,6 +54,7 @@ impl ManifestSource {
 
     fn table_prefix(&self) -> Option<&'static str> {
         match self {
+            ManifestSource::MojoProjectToml(_) => None,
             ManifestSource::PyProjectToml(_) => Some(PYPROJECT_PIXI_PREFIX),
             ManifestSource::PixiToml(_) => None,
         }
@@ -58,6 +62,7 @@ impl ManifestSource {
 
     fn manifest_mut(&mut self) -> &mut TomlDocument {
         match self {
+            ManifestSource::MojoProjectToml(document) => document,
             ManifestSource::PyProjectToml(document) => document,
             ManifestSource::PixiToml(document) => document,
         }
@@ -66,6 +71,7 @@ impl ManifestSource {
     /// Returns the inner TOML document
     pub fn manifest(&self) -> &TomlDocument {
         match self {
+            ManifestSource::MojoProjectToml(document) => document,
             ManifestSource::PyProjectToml(document) => document,
             ManifestSource::PixiToml(document) => document,
         }
@@ -99,6 +105,7 @@ impl ManifestSource {
 
     fn as_table_mut(&mut self) -> &mut Table {
         match self {
+            ManifestSource::MojoProjectToml(document) => document.as_table_mut(),
             ManifestSource::PyProjectToml(document) => document.as_table_mut(),
             ManifestSource::PixiToml(document) => document.as_table_mut(),
         }
@@ -244,6 +251,7 @@ impl ManifestSource {
         //  - When a specific platform is requested, as markers are not supported (https://github.com/prefix-dev/pixi/issues/2149)
         //  - When an editable install is requested
         if matches!(self, ManifestSource::PixiToml(_))
+            || matches!(self, ManifestSource::MojoProjectToml(_))
             || matches!(location, Some(PypiDependencyLocation::PixiPypiDependencies))
             || platform.is_some()
             || editable.is_some_and(|e| e)
