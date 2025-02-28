@@ -118,7 +118,7 @@ which = "7.0.1"
 file_url = "0.2.2"
 rattler = { version = "0.32.0", default-features = false }
 rattler_cache = { version = "0.3.9", default-features = false }
-rattler_conda_types = { version = "0.30.3", default-features = false, features = [
+rattler_conda_types = { version = "0.31.1", default-features = false, features = [
   "rayon",
 ] }
 rattler_digest = { version = "1.0.6", default-features = false }
