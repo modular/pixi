@@ -87,7 +87,7 @@ impl<'a> PyPIPrefixUpdater<'a> {
             .iter()
             .find(|r| is_python_record(r))
             .cloned() // Clone the record to own it
-            .ok_or_else(|| miette::miette!("could not resolve pypi dependencies because no python interpreter is added to the dependencies of the project.\nMake sure to add a python interpreter to the [dependencies] section of the {manifest}, or run:\n\n\tpixi add python", manifest=consts::WORKSPACE_MANIFEST))?;
+            .ok_or_else(|| miette::miette!("could not resolve pypi dependencies because no python interpreter is added to the dependencies of the project.\nMake sure to add a python interpreter to the [dependencies] section of the {manifest}, or run:\n\n\t{executable} add python", manifest=consts::WORKSPACE_MANIFEST, executable=pixi_utils::executable_name()))?;
         let tags = get_pypi_tags(
             platform,
             system_requirements,

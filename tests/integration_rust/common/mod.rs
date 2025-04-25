@@ -311,6 +311,7 @@ impl PixiControl {
                 format: None,
                 pyproject_toml: false,
                 scm: Some(GitAttributes::Github),
+                mojoproject_toml: false,
             },
         }
     }
@@ -329,6 +330,7 @@ impl PixiControl {
                 format: None,
                 pyproject_toml: false,
                 scm: Some(GitAttributes::Github),
+                mojoproject_toml: false,
             },
         }
     }

@@ -105,6 +105,7 @@ impl WorkspaceMut {
         let workspace_manifest_document = match workspace.workspace.provenance.kind {
             ManifestKind::Pyproject => ManifestDocument::PyProjectToml(toml),
             ManifestKind::Pixi => ManifestDocument::PixiToml(toml),
+            ManifestKind::MojoProject => ManifestDocument::MojoProjectToml(toml),
         };
 
         Ok(Self {
@@ -143,6 +144,7 @@ impl WorkspaceMut {
         let workspace_manifest_document = match workspace.workspace.provenance.kind {
             ManifestKind::Pyproject => ManifestDocument::PyProjectToml(toml),
             ManifestKind::Pixi => ManifestDocument::PixiToml(toml),
+            ManifestKind::MojoProject => ManifestDocument::MojoProjectToml(toml),
         };
 
         Ok(Self {

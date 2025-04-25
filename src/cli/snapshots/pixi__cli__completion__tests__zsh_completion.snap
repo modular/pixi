@@ -2,7 +2,6 @@
 source: src/cli/completion.rs
 expression: result
 ---
-
 (add)
 _arguments "${_arguments_options[@]}" \
 '--manifest-path=[The path to '\''pixi.toml'\'']:MANIFEST_PATH:_files' \
@@ -44,5 +43,3 @@ _arguments "${_arguments_options[@]}" \
 _arguments "${_arguments_options[@]}" \
 && ret=0
 ;;
-
-

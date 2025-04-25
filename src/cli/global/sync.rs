@@ -54,8 +54,9 @@ pub async fn execute(args: Args) -> miette::Result<()> {
 
     if !has_changed {
         eprintln!(
-            "{}Nothing to do. The pixi global installation is already up-to-date.",
-            console::style(console::Emoji("✔ ", "")).green()
+            "{}Nothing to do. The {pixi} global installation is already up-to-date.",
+            console::style(console::Emoji("✔ ", "")).green(),
+            pixi = pixi_utils::executable_name()
         );
     }
 

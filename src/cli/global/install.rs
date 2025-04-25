@@ -69,8 +69,8 @@ pub struct Args {
     #[clap(flatten)]
     config: ConfigCli,
 
-    /// Specifies that the environment should be reinstalled.
-    #[arg(action, long)]
+    /// Specifies that the packages should be reinstalled even if they are already installed.
+    #[arg(action, short = 'u', long)]
     force_reinstall: bool,
 
     /// Specifies that no shortcuts should be created for the installed packages.

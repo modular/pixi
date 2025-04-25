@@ -20,8 +20,9 @@ pub struct Args {
 }
 
 pub async fn execute(_args: Args) -> miette::Result<()> {
-    Err(
-        miette::miette!("You can call `pixi global update` for most use cases")
-            .wrap_err("`pixi global upgrade-all` has been removed"),
+    Err(miette::miette!(
+        "You can call `{pixi} global update` for most use cases",
+        pixi = pixi_utils::executable_name()
     )
+    .wrap_err("`pixi global upgrade-all` has been removed"))
 }
